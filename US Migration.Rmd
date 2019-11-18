@@ -1,0 +1,55 @@
+---
+title: "US Migration"
+author: "Felix Michalik"
+date: "13 July 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#This code plots a map visualizing migration from and to the Bay area
+library(ggplot2)
+library(maps)
+library(readstata13)
+
+
+for (i in 4:15){ 
+#read data
+zipsout = read.dta13(paste("ZIP",if(i<10){"0"},i,if(i<9){"0"},i+1,"bayout.dta",sep = "")) #contains the start coordinates (longitude and latitude) and end coordinates (longitude_01, y = latitude_01) for migration from the Bay area
+zipsin = read.dta13(paste("ZIP",if(i<10){"0"},i,if(i<9){"0"},i+1,"bayin.dta",sep = ""))  #contains the start coordinates (longitude and latitude) and end coordinates (longitude_01, y = latitude_01) for migration to the Bay area
+
+
+#set maptheme
+maptheme = theme(panel.grid = element_blank()) +
+  theme(axis.text = element_blank()) +
+  theme(axis.ticks = element_blank()) +
+  theme(axis.title = element_blank()) +
+  theme(panel.background = element_rect(fill = "black")) +
+  theme(legend.position="none")
+
+#load US map with state polygons from the "maps" library
+country_shapes =  geom_polygon(aes(x = long, y = lat, group = group), data = map_data("state"), fill = "grey20", color = "#515151") 
+
+#select area of world map to display
+mapcoords <- coord_fixed(xlim = c(-125, -65), ylim = c(20, 55))
+
+#ggplot
+ggplot()+ country_shapes+
+#plot start points for migration to the Bay area
+geom_point(data = zipsin, aes(x = longitude, y = latitude), size = 0.15, color ="chocolate1", shape = 20, alpha = 0.15)+
+#plot end point for migration from the Bay area
+geom_point(data = zipsout, aes(x = longitude_01, y = latitude_01), size = 0.15, color= "#0000FF", shape = 20, alpha = 0.12)+
+#plot curves for migration from the Bay area
+geom_curve(data = zipsout, aes(x = longitude, y = latitude, xend = longitude_01, yend = latitude_01), color = "turquoise2", size = 0.15, curvature = 0.1, alpha = 0.08) +
+#plot curves for migration to the Bay area
+geom_curve(data = zipsin, aes(x = longitude, y = latitude, xend = longitude_01, yend = latitude_01), color = "#ffe000", size = 0.15, curvature = 0.1, alpha = 0.08) +
+ #set predefined mapcoords and maptheme
+  mapcoords+ maptheme
+
+#save as png  
+ggsave(paste("plot20",if(i<9){"0"},i+1,"bay.png",sep = ""), dpi = 600)
+}
+```
