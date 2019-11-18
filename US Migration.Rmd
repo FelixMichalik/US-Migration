@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
-#This code plots a map visualizing migration from and to the Bay area
+#This code plots a map visualizing migration from and to the Bay area, dta files on request
 library(ggplot2)
 library(maps)
 library(readstata13)
